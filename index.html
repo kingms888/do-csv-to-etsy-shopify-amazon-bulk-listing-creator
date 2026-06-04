@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>CSV to Etsy / Shopify / Amazon Bulk Listing Creator</title>
+  <meta name="description" content="Convert your product spreadsheet (CSV) into ready‑to‑import CSV files for Etsy, Shopify, and Amazon. Pure frontend, no upload, no tracking.">
+  <meta name="keywords" content="csv bulk upload etsy, etsy listing bulk editor, amazon fba profit calculator, shopify csv import tool, etsy image alt text bulk, etsy sellers, amazon sellers, shopify sellers, csv/json tools, developer tools">
+  <meta name="author" content="Bulk Listing Tool">
+  <meta name="robots" content="index, follow">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #f6f8fa;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      padding: 1rem;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+      padding: 1.5rem 1.8rem 2.5rem;
+    }
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .subhead {
+      color: #475569;
+      font-size: 1rem;
+      margin-bottom: 1.8rem;
+      border-left: 4px solid #3b82f6;
+      padding-left: 1rem;
+      background: #f0f4ff;
+      border-radius: 0 12px 12px 0;
+      padding: 0.6rem 1rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+    @media (max-width: 720px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .container {
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e9edf2;
+      border-radius: 20px;
+      padding: 1.2rem 1.4rem 1.6rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .card h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card h2 small {
+      font-weight: 400;
+      font-size: 0.75rem;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 0.2rem 0.7rem;
+      border-radius: 30px;
+      margin-left: auto;
+    }
+    .file-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 20px;
+      padding: 1.8rem 1rem;
+      text-align: center;
+      background: #fafcff;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .file-area:hover {
+      border-color: #3b82f6;
+      background: #f0f7ff;
+    }
+    .file-area p {
+      font-weight: 500;
+      color: #1e293b;
+    }
+    .file-area small {
+      color: #64748b;
+    }
+    #csvInput {
+      display: none;
+    }
+    .preview-box {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 0.8rem 1rem;
+      margin: 0.8rem 0 0.6rem;
+      max-height: 180px;
+      overflow: auto;
+      font-size: 0.8rem;
+      border: 1px solid #e2e8f0;
+    }
+    .preview-box table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+    .preview-box th {
+      text-align: left;
+      background: #eef2f6;
+      padding: 4px 6px;
+      position: sticky;
+      top: 0;
+    }
+    .preview-box td {
+      padding: 3px 6px;
+      border-bottom: 1px solid #e9edf2;
+      white-space: nowrap;
+    }
+    .badge {
+      background: #dbeafe;
+      color: #1e4a7a;
+      padding: 0.2rem 0.7rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin: 1.2rem 0 0.8rem;
+    }
+    .btn {
+      background: white;
+      border: 1px solid #cbd5e1;
+      padding: 0.6rem 1.4rem;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .btn-primary {
+      background: #1e293b;
+      border: 1px solid #1e293b;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0f172a;
+    }
+    .btn-outline {
+      background: white;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .output-section {
+      margin-top: 1.2rem;
+    }
+    .output-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+    .output-card {
+      flex: 1 1 180px;
+      background: #f8fafc;
+      border-radius: 18px;
+      padding: 1rem;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+    }
+    .output-card h4 {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .output-card .btn {
+      margin-top: 0.5rem;
+      width: 100%;
+      justify-content: center;
+    }
+    .placeholder-ad {
+      background: #f1f5f9;
+      border-radius: 20px;
+      padding: 0.8rem 1.2rem;
+      margin: 1.8rem 0 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #e2e8f0;
+    }
+    .placeholder-ad span {
+      font-size: 0.9rem;
+      color: #334155;
+    }
+    .placeholder-ad .ad-tag {
+      background: #cbd5e1;
+      padding: 0.2rem 0.8rem;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    .affiliate-resources {
+      background: #fef9e7;
+      border: 1px solid #fde68a;
+      border-radius: 20px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0 1rem;
+    }
+    .affiliate-resources h3 {
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .affiliate-resources ul {
+      list-style: none;
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 1.8rem;
+    }
+    .affiliate-resources li a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    .affiliate-resources li a:hover {
+      text-decoration: underline;
+    }
+    .privacy-note {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 0.6rem 1rem;
+      border-radius: 40px;
+      display: inline-block;
+    }
+    .footnote {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-align: center;
+    }
+    .icon-inline {
+      width: 22px;
+      height: 22px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>
+      <span>📦 CSV → Bulk Listing Creator</span>
+      <span class="badge">Etsy · Shopify · Amazon</span>
+    </h1>
+    <div class="subhead">
+      ⚡ Drop your product CSV (title, price, images, tags) → get ready‑to‑import CSV per platform. No upload, 100% frontend.
+    </div>
+  </header>
+
+  <!-- MAIN TOOL -->
+  <div class="grid-2">
+    <!-- LEFT: INPUT -->
+    <div class="card">
+      <h2>
+        <span>📄 Your product CSV</span>
+        <small>input</small>
+      </h2>
+      <div class="file-area" id="dropArea">
+        <p><strong>Click or drag CSV here</strong></p>
+        <small>columns: title, price, image_url, tags (or similar)</small>
+        <input type="file" id="csvInput" accept=".csv">
+      </div>
+      <div id="previewContainer" style="display:none;">
+        <div class="preview-box" id="previewBox"></div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+          <span id="rowCount" class="badge">0 rows</span>
+          <span id="detectedColumns" class="badge" style="background:#e6f7e6;color:#1e6f1e;">columns: –</span>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline" id="loadSampleBtn">📋 Load sample data</button>
+        <button class="btn btn-outline" id="clearBtn">🗑️ Clear</button>
+      </div>
+      <p style="font-size:0.8rem; color:#64748b; margin-top: 0.3rem;">
+        <strong>Required columns:</strong> title, price, image_url, tags (extra columns ignored)
+      </p>
+    </div>
+
+    <!-- RIGHT: OUTPUT ACTIONS -->
+    <div class="card">
+      <h2>
+        <span>🚀 Generate platform CSV</span>
+        <small>export</small>
+      </h2>
+      <p style="margin-bottom: 0.8rem; color: #334155;">Choose your marketplace and download a ready‑to‑import CSV.</p>
+      <div class="output-cards">
+        <div class="output-card">
+          <h4>🛍️ Etsy</h4>
+          <button class="btn btn-primary" id="exportEtsy" disabled>Download Etsy CSV</button>
+        </div>
+        <div class="output-card">
+          <h4>🛒 Shopify</h4>
+          <button class="btn btn-primary" id="exportShopify" disabled>Download Shopify CSV</button>
+        </div>
+        <div class="output-card">
+          <h4>📦 Amazon</h4>
+          <button class="btn btn-primary" id="exportAmazon" disabled>Download Amazon CSV</button>
+        </div>
+      </div>
+      <div style="margin-top: 0.8rem; font-size:0.85rem; background:#f0fdf4; padding:0.5rem 1rem; border-radius:40px;">
+        ✅ Fields mapped: title, price, image link, tags (comma separated)
+      </div>
+    </div>
+  </div>
+
+  <!-- VISIBLE AD PLACEHOLDER (affiliate friendly) -->
+  <div class="placeholder-ad">
+    <span><strong>📢 Ad ·</strong> Optimize your listings with <a href="#" style="color:#2563eb; text-decoration: none;">AltTextWriter</a> – bulk alt text for Etsy/Shopify (affiliate)</span>
+    <span class="ad-tag">sponsored</span>
+  </div>
+
+  <!-- AFFILIATE / RESOURCE PLACEHOLDER -->
+  <div class="affiliate-resources">
+    <h3>🔗 Recommended tools for bulk sellers</h3>
+    <ul>
+      <li><a href="#" target="_blank" rel="noopener">📊 CSV Editor Pro</a> (clean & format)</li>
+      <li><a href="#" target="_blank" rel="noopener">🖼️ Alt Text Bulk</a> – auto image tags</li>
+      <li><a href="#" target="_blank" rel="noopener">📈 FBA Profit Calculator</a></li>
+      <li><a href="#" target="_blank" rel="noopener">🧰 Etsy Listing Importer</a></li>
+    </ul>
+    <p style="font-size:0.75rem; color:#92400e; margin-top:0.3rem;">*affiliate links – we may earn a commission</p>
+  </div>
+
+  <!-- PRIVACY NOTE + METRICS -->
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem;">
+    <div class="privacy-note">
+      🔒 <strong>Privacy:</strong> events may be counted anonymously for product improvement. No personal data collected.
+    </div>
+    <div style="font-size:0.7rem; color:#94a3b8;">
+      v1.0 · pure frontend
+    </div>
+  </div>
+  <div class="footnote">
+    CSV data stays in your browser. No upload to any server.
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ---------- METRICS (privacy friendly) ----------
+    window.reportEvent = function(name, payload = {}) {
+      if (window.ORGANISM_METRICS_ENDPOINT && typeof window.ORGANISM_METRICS_ENDPOINT === 'string') {
+        try {
+          const body = JSON.stringify({ event: name, payload, ts: Date.now() });
+          fetch(window.ORGANISM_METRICS_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body,
+            keepalive: true
+          }).catch(() => {}); // silently ignore
+        } catch(e) {}
+      }
+    };
+
+    // ---------- DOM refs ----------
+    const csvInput = document.getElementById('csvInput');
+    const dropArea = document.getElementById('dropArea');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewBox = document.getElementById('previewBox');
+    const rowCountSpan = document.getElementById('rowCount');
+    const detectedColumnsSpan = document.getElementById('detectedColumns');
+    const loadSampleBtn = document.getElementById('loadSampleBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const exportEtsy = document.getElementById('exportEtsy');
+    const exportShopify = document.getElementById('exportShopify');
+    const exportAmazon = document.getElementById('exportAmazon');
+
+    // ---------- state ----------
+    let parsedRows = [];           // array of objects { title, price, image_url, tags }
+    let rawHeaders = [];
+
+    // ---------- helpers ----------
+    function normalizeHeader(h) {
+      return h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+    }
+
+    // parse CSV text into rows with required columns
+    function parseCSVText(text) {
+      const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+      if (lines.length < 2) return { headers: [], rows: [] };
+      const headers = lines[0].split(',').map(h => normalizeHeader(h));
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split(',');
+        const obj = {};
+        headers.forEach((h, idx) => {
+          obj[h] = (vals[idx] || '').trim();
+        });
+        // map to standard fields: title, price, image_url, tags
+        const title = obj.title || obj.name || obj['product title'] || '';
+        const price = obj.price || obj.amount || obj['price (usd)'] || '';
+        const image_url = obj.image_url || obj['image url'] || obj.image || obj['main image'] || '';
+        const tags = obj.tags || obj.tag || obj['product tags'] || obj.keywords || '';
+        rows.push({ title, price, image_url, tags });
+      }
+      return { headers, rows };
+    }
+
+    function renderPreview(headers, rows) {
+      if (!rows.length) {
+        previewContainer.style.display = 'none';
+        return;
+      }
+      previewContainer.style.display = 'block';
+      rowCountSpan.textContent = rows.length + ' rows';
+      detectedColumnsSpan.textContent = 'columns: ' + headers.slice(0, 8).join(', ') + (headers.length > 8 ? '…' : '');
+
+      let html = '<table><thead><tr><th>#</th><th>title</th><th>price</th><th>image_url</th><th>tags</th></tr></thead><tbody>';
+      const maxRows = Math.min(rows.length, 12);
+      for (let i = 0; i < maxRows; i++) {
+        const r = rows[i];
+        html += `<tr><td>${i+1}</td><td>${escapeHtml(r.title.slice(0, 30))}</td><td>${escapeHtml(r.price.slice(0, 15))}</td><td>${escapeHtml(r.image_url.slice(0, 25))}</td><td>${escapeHtml(r.tags.slice(0, 30))}</td></tr>`;
+      }
+      if (rows.length > 12) html += `<tr><td colspan="5">… +${rows.length-12} more rows</td></tr>`;
+      html += '</tbody></table>';
+      previewBox.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // update UI after parse
+    function updateFromParsed(headers, rows) {
+      rawHeaders = headers;
+      parsedRows = rows;
+      renderPreview(headers, rows);
+      const hasData = rows.length > 0;
+      exportEtsy.disabled = !hasData;
+      exportShopify.disabled = !hasData;
+      exportAmazon.disabled = !hasData;
+      if (hasData) {
+        reportEvent('csv_parsed', { rowCount: rows.length });
+      }
+    }
+
+    // load file
+    function loadFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        const { headers, rows } = parseCSVText(text);
+        updateFromParsed(headers, rows);
+      };
+      reader.readAsText(file);
+    }
+
+    // ---------- sample data ----------
+    function loadSample() {
+      const sample = `title,price,image_url,tags
+"Handmade Wool Scarf","29.99","https://example.com/scarf.jpg","scarf, wool, winter, handmade"
+"Ceramic Mug Set","18.50","https://example.com/mug.jpg","mug, ceramic, gift, kitchen"
+"Linen Tote Bag","24.00","https://example.com/tote.jpg","tote, linen, eco, bag"
+"Wooden Candle Holder","14.75","https://example.com/candle.jpg","candle, wood, decor, home"
+"Silver Earrings","39.99","https://example.com/earrings.jpg","earrings, silver, jewelry, gift"`;
+      const { headers, rows } = parseCSVText(sample);
+      updateFromParsed(headers, rows);
+      reportEvent('sample_loaded', {});
+    }
+
+    // ---------- export functions ----------
+    function downloadCSV(filename, content) {
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function generateEtsyCSV(rows) {
+      // Etsy: title, price, image_url, tags (comma separated)
+      let csv = 'title,price,image_url,tags\n';
+      rows.forEach(r => {
+        const title = r.title.replace(/"/g, '""');
+        const price = r.price.replace(/"/g, '""');
+        const img = r.image_url.replace(/"/g, '""');
+        const tags = r.tags.replace(/"/g, '""');
+        csv += `"${title}","${price}","${img}","${tags}"\n`;
+      });
+      return csv;
+    }
+
+    function generateShopifyCSV(rows) {
+      // Shopify: Title, Price, Image URL, Tags (comma separated, double quotes)
+      let csv = 'Title,Price,Image URL,Tags\n';
+      rows.forEach(r => {
+        const title = r.title.replace(/"/g, '""');
+        const price = r.price.replace(/"/g, '""');
+        const img = r.image_url.replace(/"/g, '""');
+        const tags = r.tags.replace(/"/g, '""');
+        csv += `"${title}","${price}","${img}","${tags}"\n`;
+      });
+      return csv;
+    }
+
+    function generateAmazonCSV(rows) {
+      // Amazon flat file style: title, price, image_url, tags (keywords)
+      let csv = 'title,price,image_url,keywords\n';
+      rows.forEach(r => {
+        const title = r.title.replace(/"/g, '""');
+        const price = r.price.replace(/"/g, '""');
+        const img = r.image_url.replace(/"/g, '""');
+        const tags = r.tags.replace(/"/g, '""');
+        csv += `"${title}","${price}","${img}","${tags}"\n`;
+      });
+      return csv;
+    }
+
+    // ---------- event binding ----------
+    // file input
+    csvInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        loadFile(e.target.files[0]);
+        reportEvent('file_selected', { fileName: e.target.files[0].name });
+      }
+    });
+
+    // drag & drop
+    dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.style.borderColor = '#3b82f6'; });
+    dropArea.addEventListener('dragleave', () => { dropArea.style.borderColor = '#cbd5e1'; });
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.style.borderColor = '#cbd5e1';
+      if (e.dataTransfer.files.length) {
+        csvInput.files = e.dataTransfer.files;
+        loadFile(e.dataTransfer.files[0]);
+        reportEvent('file_dropped', {});
+      }
+    });
+    dropArea.addEventListener('click', () => csvInput.click());
+
+    // sample & clear
+    loadSampleBtn.addEventListener('click', loadSample);
+    clearBtn.addEventListener('click', () => {
+      parsedRows = [];
+      rawHeaders = [];
+      previewContainer.style.display = 'none';
+      previewBox.innerHTML = '';
+      exportEtsy.disabled = true;
+      exportShopify.disabled = true;
+      exportAmazon.disabled = true;
+      csvInput.value = '';
+      reportEvent('cleared', {});
+    });
+
+    // exports
+    exportEtsy.addEventListener('click', () => {
+      if (!parsedRows.length) return;
+      const csv = generateEtsyCSV(parsedRows);
+      downloadCSV('etsy_bulk_listing.csv', csv);
+      reportEvent('export_etsy', { rowCount: parsedRows.length });
+    });
+    exportShopify.addEventListener('click', () => {
+      if (!parsedRows.length) return;
+      const csv = generateShopifyCSV(parsedRows);
+      downloadCSV('shopify_bulk_listing.csv', csv);
+      reportEvent('export_shopify', { rowCount: parsedRows.length });
+    });
+    exportAmazon.addEventListener('click', () => {
+      if (!parsedRows.length) return;
+      const csv = generateAmazonCSV(parsedRows);
+      downloadCSV('amazon_bulk_listing.csv', csv);
+      reportEvent('export_amazon', { rowCount: parsedRows.length });
+    });
+
+    // initial sample
+    loadSample();
+
+    // report tool view
+    reportEvent('tool_viewed', {});
+  })();
+</script>
+
+<section data-organism-discovery="hub" style="margin:32px auto 20px;max-width:1040px;padding:16px;border-top:1px solid #d9e2ec;color:#475569;font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <strong style="display:block;color:#0f172a;margin-bottom:6px">More free browser tools</strong>
+  <p style="margin:0 0 8px">This page is part of an autonomous micro-tool network. Explore the live tool directory and related utilities.</p>
+  <p style="margin:0"><a href="https://kingms888.github.io/do-digital-organism-index/" style="color:#0f766e;font-weight:700">Open the tool directory</a> </p>
+</section>
+</body>
+</html>
